@@ -1,5 +1,5 @@
 {
-  "name": "dindigital/DataAccessLayer",
+  "name": "dindigital/data-access-layer",
   "description": "A Framework for Data Access Layer",
   "type": "library",
   "require": {
