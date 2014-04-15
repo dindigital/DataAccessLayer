@@ -1,5 +1,5 @@
 {
-  "name": "dindigital/dataaccesslayer",
+  "name": "dindigital/DataAccessLayer",
   "description": "Din Digital Framework",
   "type": "library",
   "autoload": {
