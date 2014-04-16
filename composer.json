@@ -1,6 +1,6 @@
 {
   "name": "dindigital/data-access-layer",
-  "description": "A Framework for Data Access Layer",
+  "description": "A Framework for Data Access Layer.",
   "type": "library",
   "require": {
       "php": ">=5.3.0"
