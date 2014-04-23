@@ -44,7 +44,7 @@ class PDODriver extends \PDO
   {
     $stmt = $this->prepare($SQL);
     if ( $fetch_class ) {
-      $stmt->setFetchMode(\PDO::FETCH_INTO, $fetch_class);
+      $stmt->setFetchMode(\PDO::FETCH_CLASS, get_class($fetch_class));
       $stmt->execute($arrParams);
       $result = $stmt->fetchAll();
     } else {
