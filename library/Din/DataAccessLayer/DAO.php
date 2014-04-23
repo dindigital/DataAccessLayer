@@ -121,9 +121,9 @@ class DAO
    * @param \Din\DataAccessLayer\Select $select
    * @return array
    */
-  public function select ( Select $select )
+  public function select ( Select $select, $fetch_class = null )
   {
-    return $this->_driver->select($select->getSQL(), $select->getWhereValues());
+    return $this->_driver->select($select->getSQL(), $select->getWhereValues(), $fetch_class);
 
   }
 

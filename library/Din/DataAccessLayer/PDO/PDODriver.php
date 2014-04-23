@@ -40,13 +40,21 @@ class PDODriver extends \PDO
    * @param array $arrParams
    * @return array
    */
-  public function select ( $SQL, array $arrParams = array() )
+  public function select ( $SQL, array $arrParams = array(), $fetch_class = null )
   {
     $stmt = $this->prepare($SQL);
-    $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+    if ( $fetch_class ) {
+      $stmt->setFetchMode(\PDO::FETCH_INTO, $fetch_class);
+      $stmt->execute($arrParams);
+      $result = $stmt->fetchAll();
+    } else {
+      $stmt->setFetchMode(\PDO::FETCH_ASSOC);
 
-    $stmt->execute($arrParams);
-    $result = $stmt->fetchAll();
+      $stmt->execute($arrParams);
+      $result = $stmt->fetchAll();
+    }
+
+
 
     return $result;
 
