@@ -121,6 +121,18 @@ class DAO
    * @param \Din\DataAccessLayer\Select $select
    * @return array
    */
+  public function select_pure ( $SQL, $params, $fetch_class = null )
+  {
+    return $this->_driver->select($SQL, $params, $fetch_class);
+
+  }
+
+  /**
+   * Realiza select utilizando instancia da class Select como parametro
+   * Retorna resultado em array
+   * @param \Din\DataAccessLayer\Select $select
+   * @return array
+   */
   public function select ( Select $select, $fetch_class = null )
   {
     return $this->_driver->select($select->getSQL(), $select->getWhereValues(), $fetch_class);
