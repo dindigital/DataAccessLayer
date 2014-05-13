@@ -19,10 +19,53 @@ class SelectCount implements SelectReadyInterface
   {
     $SQL = $this->_select->getSQL();
 
-    $inject = "SELECT COUNT(*) total ";
+    if ( strpos($SQL, 'UNION') !== false ) {
+      $SQL = $this->countUnion($SQL);
+    } else {
+      $SQL = $this->countNormal($SQL);
+    }
+
+    return $SQL;
+
+  }
+
+  protected function countUnion ( $SQL )
+  {
+    $unions = explode('UNION', $SQL);
+
+    foreach ( $unions as $i => $part ) {
+      $part = str_replace(PHP_EOL, ' ', $part);
+      $part = str_replace("\r", ' ', $part);
+
+      $part = preg_replace('/SELECT(.*)FROM/', '
+        SELECT COUNT(*) to_sum FROM
+        ', $part);
+
+      $part = preg_replace('/ORDER(.*)/', '', $part);
+
+      $unions[$i] = $part;
+    }
+
+
+    $SQL = implode('UNION ALL', $unions);
+
+    $SQL = "
+      SELECT SUM(to_sum) total FROM (
+        {$SQL}
+      ) counter
+    ";
+
+    return $SQL;
+
+  }
+
+  protected function countNormal ( $SQL )
+  {
     $last_from_pos = strrpos($SQL, 'FROM');
 
-    $SQL = $inject . substr($SQL, $last_from_pos);
+    $SQL = "
+      SELECT COUNT(*) total
+      " . substr($SQL, $last_from_pos);
 
     return $SQL;
 
