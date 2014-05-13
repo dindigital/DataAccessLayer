@@ -5,6 +5,8 @@ namespace Din\DataAccessLayer;
 use Din\DataAccessLayer\PDO\PDODriver;
 use Din\DataAccessLayer\Table\iTable;
 use Din\DataAccessLayer\Select;
+use Din\DataAccessLayer\Select\SelectReadyInterface;
+use Din\DataAccessLayer\Select\SelectCount;
 use Exception;
 
 class DAO
@@ -130,10 +132,10 @@ class DAO
   /**
    * Realiza select utilizando instancia da class Select como parametro
    * Retorna resultado em array
-   * @param \Din\DataAccessLayer\Select $select
+   * @param SelectReadyInterface $select
    * @return array
    */
-  public function select ( Select $select, $fetch_class = null )
+  public function select ( SelectReadyInterface $select, $fetch_class = null )
   {
     return $this->_driver->select($select->getSQL(), $select->getWhereValues(), $fetch_class);
 
@@ -145,9 +147,10 @@ class DAO
    * @param \Din\DataAccessLayer\Select $select
    * @return int
    */
-  public function select_count ( Select $select )
+  public function select_count ( SelectReadyInterface $select )
   {
-    $result = $this->_driver->select($select->getSQLCount(), $select->getWhereValues());
+    $select = new SelectCount($select);
+    $result = $this->_driver->select($select->getSQL(), $select->getWhereValues());
 
     return intval($result[0]['total']);
 

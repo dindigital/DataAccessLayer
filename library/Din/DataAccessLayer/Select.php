@@ -3,8 +3,9 @@
 namespace Din\DataAccessLayer;
 
 use Din\DataAccessLayer\Criteria\Criteria;
+use Din\DataAccessLayer\Select\SelectReadyInterface;
 
-class Select
+class Select implements SelectReadyInterface
 {
 
   private $_fields = array();

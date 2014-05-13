@@ -3,41 +3,53 @@
 namespace Din\DataAccessLayer\Select;
 
 use Din\DataAccessLayer\Criteria\Criteria;
+use Din\DataAccessLayer\Select\SubselectReadyInterface;
+use Din\DataAccessLayer\Select\Join;
+use Din\DataAccessLayer\Select\JoinTypes;
+use Din\DataAccessLayer\Select\SelectReadyInterface;
 
-class Select
+class Select implements SelectReadyInterface
 {
 
-  private $_fields = array();
-  private $_table;
+  protected $_table;
+  protected $_fields = array();
+  protected $_where_fields;
+  protected $_where_values = array();
+  protected $_group_by;
+  protected $_order_by;
+  protected $_limit;
+  protected $_joins;
 
-  public function __construct ( $table, $fields = array() )
+  public function __construct ( $table )
   {
     $this->setTable($table);
-    $this->setFields($fields);
 
   }
 
   public function setTable ( $table )
   {
-    $this->_table = $table;
-
-  }
-
-  public function setFields ( $fields )
-  {
-    foreach ( $fields as $key => $field ) {
-      $alias = !is_numeric($key) ? $key : null;
-      $this->addField($field, $alias);
-    }
-
-    return $this;
+    $this->_table = "`{$table}`";
 
   }
 
   public function addAllFields ()
   {
-    $str_field = "{{$this->getTable()}}.*";
+    $str_field = "{$this->_table}.*";
     $this->_fields['*'] = $str_field;
+
+    return $this;
+
+  }
+
+  public function addSubselect ( SubselectReadyInterface $subselect, $alias )
+  {
+    $SQL = $subselect->getSQL();
+    $str_field = "({$SQL}) as '{$alias}'";
+
+    $this->_fields[$alias] = $str_field;
+    $this->_where_values = array_merge(
+            $this->_where_values, $subselect->getWhereValues()
+    );
 
     return $this;
 
@@ -45,7 +57,7 @@ class Select
 
   public function addField ( $field, $alias = null )
   {
-    $str_field = "{{$this->getTable()}}.`{$field}`";
+    $str_field = "{$this->_table}.`{$field}`";
 
     if ( $alias ) {
       $str_field .= " as '{$alias}'";
@@ -56,116 +68,55 @@ class Select
 
   }
 
-  public function addSField ( $alias, $value )
+  public function addSField ( $value, $alias )
   {
-    $this->_fields[$alias] = "'{$value}' as {$alias}";
+    $this->_fields[$alias] = "'{$value}' as '{$alias}'";
 
     return $this;
 
   }
 
-  public function addFField ( $alias, $function )
+  public function addFField ( $function, $alias )
   {
-    $this->_fields[$alias] = "{$function} as {$alias}";
+    $this->_fields[$alias] = "{$function} as '{$alias}'";
 
     return $this;
 
   }
 
-  public function addJoin ( $type, $join, $field, $field2 = null )
+  public function addJoin ( Join $join )
   {
-    $master_table = $this->getTable();
-    $joined_table = $join->getTable();
-
-    if ( is_null($field2) ) {
-      $field2 = $field;
-    }
-
-    $on = "{{$joined_table}}.`{$field}` = {{$master_table}}.`{$field2}`";
-
-    $str_join = "{$type} JOIN
-        `{$joined_table}` {{$joined_table}}
-      ON
-        {$on}
-    ";
-
-    $this->_tables = array_merge($this->_tables, $join->getTables());
-
-    $std = new \stdClass();
-    $std->join = $str_join . '  ' . $join->getJoins();
-    $std->join_fields = $join->getFields();
-
-    $this->_join[$joined_table] = $std;
+    $this->_joins .= $join->getSQL();
 
     return $this;
 
   }
 
-  public function getTables ()
+  public function inner_join ( $table, $origin_field, $foreign_field )
   {
-    return $this->_tables;
+    $join = new Join($table, JoinTypes::INNER);
+    $join->on("{$this->_table}.`{$origin_field}`", $foreign_field);
+
+    return $this->addJoin($join);
 
   }
 
-  public function getJoins ()
+  public function left_join ( $table, $origin_field, $foreign_field )
   {
-    $joins = array();
-    foreach ( $this->getJoin() as $join ) {
-      $joins[] = $join->join;
-    }
+    $join = new Join($table, JoinTypes::LEFT);
+    $join->on("{$this->_table}.`{$origin_field}`", $foreign_field);
 
-    $str_joins = implode('', $joins);
-
-    return $str_joins;
+    return $this->addJoin($join);
 
   }
 
-  public function getJoin ()
+  public function where ( Criteria $criteria )
   {
-    return $this->_join;
-
-  }
-
-  public function inner_join ( $field, $join, $field2 = null )
-  {
-    return $this->setJoin('INNER', $join, $field, $field2);
-
-  }
-
-  public function left_join ( $field, $join, $field2 = null )
-  {
-    return $this->setJoin('LEFT', $join, $field, $field2);
-
-  }
-
-  public function setWhere ( $arrCriteria )
-  {
-    $criteria = new Criteria($arrCriteria);
     $criteria->buildSQL();
     $this->_where_fields = '  ' . $criteria->getSQL();
-    $this->_where_values = $criteria->getParams();
-
-    return $this;
-
-  }
-
-  public function getWhereValues ()
-  {
-    return $this->_where_values;
-
-  }
-
-  public function where ( $arrCriteria )
-  {
-    return $this->setWhere($arrCriteria);
-
-  }
-
-  public function setOrderBy ( $order_by )
-  {
-    $this->_order_by = "
-      ORDER BY
-        {$order_by}";
+    $this->_where_values = array_merge(
+            $this->_where_values, $criteria->getParams()
+    );
 
     return $this;
 
@@ -173,7 +124,11 @@ class Select
 
   public function order_by ( $order_by )
   {
-    return $this->setOrderBy($order_by);
+    $this->_order_by = "
+      ORDER BY
+        {$order_by}";
+
+    return $this;
 
   }
 
@@ -192,7 +147,6 @@ class Select
 
   public function group_by ( $field )
   {
-    $this->_group_by_field = $field;
     $this->_group_by = "  GROUP BY
         {$field}";
 
@@ -200,18 +154,11 @@ class Select
 
   }
 
-  public function getFields ()
+  protected function getFields ()
   {
-
     $fields = array();
     if ( count($this->_fields) ) {
       $fields = array(implode(', ', $this->_fields));
-    }
-
-    foreach ( $this->getJoin() as $join ) {
-      if ( $join->join_fields != '' ) {
-        $fields[] = $join->join_fields;
-      }
     }
 
     $str_fields = implode(',' . PHP_EOL . '        ', $fields);
@@ -222,23 +169,22 @@ class Select
 
   public function getSQL ()
   {
-//    if ( $this->_count )
-//      return $this->getSQLCount();
-
-    $str_fields = $this->getFields();
-    $str_joins = $obj->getJoins();
-    $str_union = $obj->getUnion();
-    $str_where = $obj->_where_fields;
-
     $r = "
       SELECT
-        {$str_fields}
+        {$this->getFields()}
       FROM
-        `{$obj->_table}` {$obj->_table_alias}
-      {$str_joins}{$str_where}{$str_union}{$obj->_group_by}{$obj->_order_by}{$obj->_limit}
+        {$this->_table}
+      {$this->_joins}
+      {$this->_where_fields}{$this->_group_by}{$this->_order_by}{$this->_limit}
     ";
 
     return $r;
+
+  }
+
+  public function getWhereValues ()
+  {
+    return $this->_where_values;
 
   }
 
