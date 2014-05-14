@@ -40,8 +40,8 @@ class Join
    */
   public function on ( $origin_field, $foreign_field )
   {
-    $this->_field1 = "{$this->_table}.`{$origin_field}`";
-    $this->_field2 = $foreign_field;
+    $this->_field1 = $origin_field;
+    $this->_field2 = "{$this->_table}.`{$foreign_field}`";
 
   }
 
