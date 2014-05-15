@@ -34,7 +34,7 @@ class Select implements SelectReadyInterface
 
   public function addAllFields ()
   {
-    $str_field = "{$this->_table}.*";
+    $str_field = "{$this->_table}.*" . PHP_EOL;
     $this->_fields['*'] = $str_field;
 
     return $this;
@@ -44,7 +44,8 @@ class Select implements SelectReadyInterface
   public function addSubselect ( SubselectReadyInterface $subselect, $alias )
   {
     $SQL = $subselect->getSQL();
-    $str_field = "({$SQL}) as '{$alias}'";
+    $str_field = "
+      ({$SQL}) as '{$alias}'";
 
     $this->_fields[$alias] = $str_field;
     $this->_where_values = array_merge(
@@ -57,7 +58,8 @@ class Select implements SelectReadyInterface
 
   public function addField ( $field, $alias = null )
   {
-    $str_field = "{$this->_table}.`{$field}`";
+    $str_field = "
+        {$this->_table}.`{$field}`";
 
     if ( $alias ) {
       $str_field .= " as '{$alias}'";
@@ -70,7 +72,8 @@ class Select implements SelectReadyInterface
 
   public function addSField ( $value, $alias )
   {
-    $this->_fields[$alias] = "'{$value}' as '{$alias}'";
+    $this->_fields[$alias] = "
+      '{$value}' as '{$alias}'";
 
     return $this;
 
@@ -78,7 +81,8 @@ class Select implements SelectReadyInterface
 
   public function addFField ( $function, $alias )
   {
-    $this->_fields[$alias] = "{$function} as '{$alias}'";
+    $this->_fields[$alias] = "
+        {$function} as '{$alias}'";
 
     return $this;
 
@@ -170,12 +174,9 @@ class Select implements SelectReadyInterface
   public function getSQL ()
   {
     $r = "
-      SELECT
-        {$this->getFields()}
+      SELECT{$this->getFields()}
       FROM
-        {$this->_table}
-      {$this->_joins}
-      {$this->_where_fields}{$this->_group_by}{$this->_order_by}{$this->_limit}
+        {$this->_table}{$this->_joins}{$this->_where_fields}{$this->_group_by}{$this->_order_by}{$this->_limit}
     ";
 
     return $r;
