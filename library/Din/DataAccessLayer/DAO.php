@@ -157,6 +157,20 @@ class DAO
   }
 
   /**
+   * Realiza SELECT COUNT utilizando instancia da class Select como parametro
+   * Retorna um número inteiro.
+   * @param \Din\DataAccessLayer\Select $select
+   * @return int
+   */
+  public function select_count_old ( SelectReadyInterface $select )
+  {
+    $result = $this->_driver->select($select->getSQLCount(), $select->getWhereValues());
+
+    return intval($result[0]['total']);
+
+  }
+
+  /**
    * Executa uma query livre, passando por parametro ela e o criterio.
    * Retorna o número de linhas afetadas.
    * @param string $SQL
