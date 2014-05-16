@@ -61,6 +61,9 @@ class SelectCount implements SelectReadyInterface
 
   protected function countNormal ( $SQL )
   {
+    $SQL = str_replace(PHP_EOL, ' ', $SQL);
+    $SQL = str_replace("\r", ' ', $SQL);
+    $SQL = preg_replace('/ORDER(.*)/', '', $SQL);
     $last_from_pos = strrpos($SQL, 'FROM');
 
     $SQL = "
