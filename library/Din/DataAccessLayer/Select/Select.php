@@ -35,7 +35,7 @@ class Select implements SelectReadyInterface
   public function addAllFields ()
   {
     $str_field = "
-        {$this->_table}.*" . PHP_EOL;
+        {$this->_table}.*";
     $this->_fields['*'] = $str_field;
 
     return $this;
