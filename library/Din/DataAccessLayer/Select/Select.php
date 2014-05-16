@@ -34,7 +34,8 @@ class Select implements SelectReadyInterface
 
   public function addAllFields ()
   {
-    $str_field = "{$this->_table}.*" . PHP_EOL;
+    $str_field = "
+        {$this->_table}.*" . PHP_EOL;
     $this->_fields['*'] = $str_field;
 
     return $this;
@@ -151,7 +152,8 @@ class Select implements SelectReadyInterface
 
   public function group_by ( $field )
   {
-    $this->_group_by = "  GROUP BY
+    $this->_group_by = "
+      GROUP BY
         {$field}";
 
     return $this;
@@ -173,11 +175,17 @@ class Select implements SelectReadyInterface
 
   public function getSQL ()
   {
-    $r = "
-      SELECT{$this->getFields()}
-      FROM
-        {$this->_table}{$this->_joins}{$this->_where_fields}{$this->_group_by}{$this->_order_by}{$this->_limit}
-    ";
+    $r = '
+      SELECT'
+            . $this->getFields()
+            . '      FROM'
+            . '
+        ' . $this->_table
+            . $this->_joins
+            . $this->_where_fields
+            . $this->_group_by
+            . $this->_order_by
+            . $this->_limit;
 
     return $r;
 

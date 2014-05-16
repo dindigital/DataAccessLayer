@@ -36,7 +36,8 @@ class Criteria
 
   public function getSQL ()
   {
-    return $this->_sql != '' ? 'WHERE ' . $this->_sql : '';
+    return $this->_sql != '' ? 'WHERE
+        ' . $this->_sql : '';
 
   }
 
