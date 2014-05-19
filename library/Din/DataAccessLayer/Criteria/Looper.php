@@ -17,6 +17,7 @@ class Looper
         $new = new self;
         $new->persistCriteria($value, $sp->getSeparator());
         $this->_fields[] = $new->getFields();
+        $this->_params = array_merge($this->_params, $new->getParams());
       } else {
         $separator = $separator ? $separator : $sp->getSeparator();
 

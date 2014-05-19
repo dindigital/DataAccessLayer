@@ -70,6 +70,7 @@ class SelectCount implements SelectReadyInterface
 
     if ( $start_gb = strpos($SQL, 'GROUP BY') ) {
       $count_field = (trim(substr($SQL, $start_gb + 8)));
+      $count_field = "DISTINCT({$count_field})";
       $SQL = str_replace(substr($SQL, $start_gb), '', $SQL);
     }
 
