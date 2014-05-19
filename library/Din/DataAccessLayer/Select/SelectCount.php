@@ -64,14 +64,20 @@ class SelectCount implements SelectReadyInterface
     $SQL = str_replace(PHP_EOL, ' ', $SQL);
     $SQL = str_replace("\r", ' ', $SQL);
     $SQL = preg_replace('/ORDER(.*)/', '', $SQL);
+    $SQL = preg_replace('!\s+!', ' ', $SQL . ' ');
     $last_from_pos = strrpos($SQL, 'FROM');
 
     $count_field = '*';
 
     if ( $start_gb = strpos($SQL, 'GROUP BY') ) {
-      $count_field = (trim(substr($SQL, $start_gb + 8)));
+      $gb_part = substr($SQL, $start_gb);
+
+      $nextspace = strpos($gb_part, ' ', 9);
+      $gb_field = substr($gb_part, 9, $nextspace - 9);
+
+      $count_field = (trim($gb_field));
       $count_field = "DISTINCT({$count_field})";
-      $SQL = str_replace(substr($SQL, $start_gb), '', $SQL);
+      $SQL = str_replace($gb_part, '', $SQL);
     }
 
     $SQL = "
