@@ -178,7 +178,8 @@ class Select implements SelectReadyInterface
     $r = '
       SELECT'
             . $this->getFields()
-            . '      FROM'
+            . '
+      FROM'
             . '
         ' . $this->_table
             . $this->_joins
