@@ -66,8 +66,15 @@ class SelectCount implements SelectReadyInterface
     $SQL = preg_replace('/ORDER(.*)/', '', $SQL);
     $last_from_pos = strrpos($SQL, 'FROM');
 
+    $count_field = '*';
+
+    if ( $start_gb = strpos($SQL, 'GROUP BY') ) {
+      $count_field = (trim(substr($SQL, $start_gb + 8)));
+      $SQL = str_replace(substr($SQL, $start_gb), '', $SQL);
+    }
+
     $SQL = "
-      SELECT COUNT(*) total
+      SELECT COUNT({$count_field}) total
       " . substr($SQL, $last_from_pos);
 
     return $SQL;
