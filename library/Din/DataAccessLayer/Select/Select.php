@@ -15,6 +15,7 @@ class Select implements SelectReadyInterface
   protected $_fields = array();
   protected $_where_fields;
   protected $_where_values = array();
+  protected $_having_fields;
   protected $_group_by;
   protected $_order_by;
   protected $_limit;
@@ -127,6 +128,21 @@ class Select implements SelectReadyInterface
 
   }
 
+  public function having ( Criteria $criteria )
+  {
+    $criteria->buildSQL();
+    $where = '  ' . $criteria->getSQL();
+    $having = str_replace('WHERE', '
+      HAVING', $where);
+    $this->_having_fields = $having;
+    $this->_where_values = array_merge(
+            $this->_where_values, $criteria->getParams()
+    );
+
+    return $this;
+
+  }
+
   public function order_by ( $order_by )
   {
     $this->_order_by = "
@@ -185,6 +201,7 @@ class Select implements SelectReadyInterface
             . $this->_joins
             . $this->_where_fields
             . $this->_group_by
+            . $this->_having_fields
             . $this->_order_by
             . $this->_limit;
 
