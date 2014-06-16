@@ -2,7 +2,7 @@
 
 namespace Din\DataAccessLayer;
 
-use Din\DataAccessLayer\PDO\PDODriver;
+use PDO;
 use Din\DataAccessLayer\Table\iTable;
 use Din\DataAccessLayer\Select;
 use Din\DataAccessLayer\Select\SelectReadyInterface;
@@ -13,17 +13,18 @@ class DAO
 {
 
   /**
-   * Instancia PDODriver
-   * @var object
+   * Instancia PDO
+   * @var \PDO
    */
   public $_driver;
 
   /**
    * Data Access Object para operações CRUD.
-   * @param \Din\DataAccessLayer\PDO\PDODriver $PDO
+   * @param \PDO $PDO
    */
-  public function __construct ( PDODriver $PDO )
+  public function __construct ( PDO $PDO )
   {
+    $PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $this->_driver = $PDO;
 
   }
@@ -48,7 +49,7 @@ class DAO
     $SQL = $insert->getSQL();
     $arr_params = $insert->getParams();
 
-    $this->_driver->execute($SQL, $arr_params);
+    $this->pdoExecute($SQL, $arr_params);
 
     return $this->_driver->lastInsertId();
 
@@ -74,7 +75,7 @@ class DAO
     $SQL = $update->getSQL();
     $arr_params = $update->getParams();
 
-    $PDOStatement = $this->_driver->execute($SQL, $arr_params);
+    $PDOStatement = $this->pdoExecute($SQL, $arr_params);
 
     return $PDOStatement->rowCount();
 
@@ -97,7 +98,7 @@ class DAO
     $SQL = $delete->getSQL();
     $arr_params = $delete->getParams();
 
-    $PDOStatement = $this->_driver->execute($SQL, $arr_params);
+    $PDOStatement = $this->pdoExecute($SQL, $arr_params);
 
     return $PDOStatement->rowCount();
 
@@ -125,7 +126,7 @@ class DAO
    */
   public function select_pure ( $SQL, $params, $fetch_class = null )
   {
-    return $this->_driver->select($SQL, $params, $fetch_class);
+    return $this->pdoFetch($SQL, $params, $fetch_class);
 
   }
 
@@ -137,7 +138,7 @@ class DAO
    */
   public function select ( SelectReadyInterface $select, $fetch_class = null )
   {
-    return $this->_driver->select($select->getSQL(), $select->getWhereValues(), $fetch_class);
+    return $this->pdoFetch($select->getSQL(), $select->getWhereValues(), $fetch_class);
 
   }
 
@@ -150,7 +151,7 @@ class DAO
   public function select_count ( SelectReadyInterface $select )
   {
     $select = new SelectCount($select);
-    $result = $this->_driver->select($select->getSQL(), $select->getWhereValues());
+    $result = $this->pdoFetch($select->getSQL(), $select->getWhereValues());
 
     return intval($result[0]['total']);
 
@@ -164,7 +165,7 @@ class DAO
    */
   public function select_count_old ( SelectReadyInterface $select )
   {
-    $result = $this->_driver->select($select->getSQLCount(), $select->getWhereValues());
+    $result = $this->pdoFetch($select->getSQLCount(), $select->getWhereValues());
 
     return intval($result[0]['total']);
 
@@ -186,9 +187,51 @@ class DAO
     $SQL = $execute->getSQL();
     $arr_params = $execute->getParams();
 
-    $PDOStatement = $this->_driver->execute($SQL, $arr_params);
+    $PDOStatement = $this->pdoExecute($SQL, $arr_params);
 
-    return $fetch ? $PDOStatement->fetchAll(PDODriver::FETCH_ASSOC) : $PDOStatement->rowCount();
+    return $fetch ? $PDOStatement->fetchAll(PDO::FETCH_ASSOC) : $PDOStatement->rowCount();
+
+  }
+
+  /**
+   * Executa uma query e retorna um fetchAll do PDO.
+   * Utilizada em consultas SELECT
+   *
+   * @param string $SQL
+   * @param array $arrParams
+   * @return array
+   */
+  private function pdoFetch ( $SQL, array $arrParams = array(), $fetch_class = null )
+  {
+    $stmt = $this->_driver->prepare($SQL);
+    if ( $fetch_class ) {
+      $stmt->setFetchMode(PDO::FETCH_CLASS, get_class($fetch_class));
+      $stmt->execute($arrParams);
+      $result = $stmt->fetchAll();
+    } else {
+      $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+      $stmt->execute($arrParams);
+      $result = $stmt->fetchAll();
+    }
+
+    return $result;
+
+  }
+
+  /**
+   * Executa o SQL e retorna uma instancia de PDOStatement
+   *
+   * @param string $SQL
+   * @param array $arrParams
+   * @return \PDOStatement
+   */
+  public function pdoExecute ( $SQL, array $arrParams = array() )
+  {
+    $PDOStatement = $this->_driver->prepare($SQL);
+    $PDOStatement->execute($arrParams);
+
+    return $PDOStatement;
 
   }
 
