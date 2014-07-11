@@ -113,7 +113,7 @@ class DAO
       $SQL = str_replace('?', '"' . $parameter . '"', $SQL);
     }
 
-    var_dump($SQL);
+    print_r($SQL);
     exit;
 
   }

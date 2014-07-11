@@ -58,10 +58,13 @@ class Select implements SelectReadyInterface
 
   }
 
-  public function addField ( $field, $alias = null )
+  public function addField ( $field, $alias = null, $table = null )
   {
+
+    $table = is_null($table) ? $this->_table : "`{$table}`";
+
     $str_field = "
-        {$this->_table}.`{$field}`";
+        {$table}.`{$field}`";
 
     if ( $alias ) {
       $str_field .= " as '{$alias}'";
