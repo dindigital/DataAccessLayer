@@ -143,6 +143,25 @@ class DAO
   }
 
   /**
+   * Realiza select utilizando instancia da class Select como parametro
+   * Retorna resultado em array
+   * @param SelectReadyInterface $select
+   * @return array
+   */
+  public function select_iterator ( SelectReadyInterface $select, $fetch_class, \Site\Models\DataAccess\Collection\AbstractCollection $collection )
+  {
+    $stmt = $this->_driver->prepare($select->getSQL());
+    $stmt->setFetchMode(PDO::FETCH_CLASS, get_class($fetch_class));
+    $stmt->execute($select->getWhereValues());
+    $result = $stmt->fetchAll();
+
+    $collection->setItens($result);
+
+    return $collection;
+
+  }
+
+  /**
    * Realiza SELECT COUNT utilizando instancia da class Select como parametro
    * Retorna um número inteiro.
    * @param \Din\DataAccessLayer\Select $select
