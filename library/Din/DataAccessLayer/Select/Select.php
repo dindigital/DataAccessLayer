@@ -69,7 +69,10 @@ class Select implements SelectReadyInterface
     if ( $alias ) {
       $str_field .= " as '{$alias}'";
     }
-    $this->_fields[$field] = $str_field;
+
+    $field_id = is_null($alias) ? $field : $alias;
+
+    $this->_fields[$field_id] = $str_field;
 
     return $this;
 
@@ -101,10 +104,12 @@ class Select implements SelectReadyInterface
 
   }
 
-  public function inner_join ( $table, $origin_field, $foreign_field )
+  public function inner_join ( $table, $origin_field, $foreign_field, $origin_table = null )
   {
+    $origin_table = is_null($origin_table) ? $this->_table : "`{$origin_table}`";
+
     $join = new Join($table, JoinTypes::INNER);
-    $join->on("{$this->_table}.`{$origin_field}`", $foreign_field);
+    $join->on("{$origin_table}.`{$origin_field}`", $foreign_field);
 
     return $this->addJoin($join);
 
