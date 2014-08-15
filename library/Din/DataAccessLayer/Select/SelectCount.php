@@ -31,7 +31,7 @@ class SelectCount implements SelectReadyInterface
 
   protected function countUnion ( $SQL )
   {
-    $unions = explode('UNION', $SQL);
+    $unions = explode('UNION ALL', $SQL);
 
     foreach ( $unions as $i => $part ) {
       $part = str_replace(PHP_EOL, ' ', $part);
