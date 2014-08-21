@@ -307,7 +307,7 @@ class Select implements SelectReadyInterface
 
   public function union ( $obj )
   {
-    return $this->setUnion($obj);
+    return $this->union_all($obj);
 
   }
 
