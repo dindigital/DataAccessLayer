@@ -128,9 +128,10 @@ class Select implements SelectReadyInterface
   {
     $criteria->buildSQL();
     $this->_where_fields = '  ' . $criteria->getSQL();
-    $this->_where_values = array_merge(
-            $this->_where_values, $criteria->getParams()
-    );
+//    $this->_where_values = array_merge(
+//            $this->_where_values, $criteria->getParams()
+//    );
+    $this->_where_values = $criteria->getParams();
 
     return $this;
 
