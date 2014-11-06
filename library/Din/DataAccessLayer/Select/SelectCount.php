@@ -11,7 +11,7 @@ class SelectCount implements SelectReadyInterface
 
   public function __construct ( SelectReadyInterface $select )
   {
-    $this->_select = $select;
+    $this->_select = clone($select);
 
   }
 
