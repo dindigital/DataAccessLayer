@@ -148,7 +148,7 @@ class DAO
    * @param SelectReadyInterface $select
    * @return array
    */
-  public function select_iterator ( SelectReadyInterface $select, $fetch_class, \Site\Models\DataAccess\Collection\AbstractCollection $collection )
+  public function select_iterator ( SelectReadyInterface $select, $fetch_class, $collection )
   {
     $stmt = $this->_driver->prepare($select->getSQL());
     $stmt->setFetchMode(PDO::FETCH_CLASS, get_class($fetch_class));
