@@ -16,6 +16,16 @@ class Field
       $field = substr($field, $dotpos + 1);
     }
     $expression = str_replace($field, "`{$field}`", $expression);
+
+    /*
+    * Condição para efetuar a busca por Mês, desconsiderando o campo
+    * utilizando a função MONTH() 
+    */
+    $pos = strpos($expression, 'MONTH');
+    if ($pos !== false) {
+       $expression = str_replace("`{$field}`", "{$field}", $expression);
+    }
+
     $this->_expression = $expression;
 
   }
