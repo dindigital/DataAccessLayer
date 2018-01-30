@@ -26,6 +26,7 @@ class Select implements SelectReadyInterface
   private $_limit;
   private $_group_by;
   private $_group_by_field;
+  private $str_having = null;
 
   private function getAutoAlias ()
   {
@@ -405,11 +406,16 @@ class Select implements SelectReadyInterface
         {$str_fields}
       FROM
         `{$obj->_table}` {$obj->_table_alias}
-      {$str_joins}{$str_where}{$str_union}{$obj->_group_by}{$obj->_order_by}{$obj->_limit}
+      {$str_joins}{$str_where}{$str_union}{$obj->_group_by}{$this->str_having}{$obj->_order_by}{$obj->_limit}
     ";
 
     return $r;
 
+  }
+
+  public function setHaving($str)
+  {
+      $this->str_having = " HAVING {$str}";
   }
 
   public function getSQLCount ( $union = false )

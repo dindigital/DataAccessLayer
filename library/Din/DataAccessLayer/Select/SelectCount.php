@@ -21,8 +21,10 @@ class SelectCount implements SelectReadyInterface
 
     if ( strpos($SQL, 'UNION') !== false ) {
       $SQL = $this->countUnion($SQL);
+    } elseif(strpos($SQL, 'HAVING') !== false ) {
+        $SQL = $this->countHaving($SQL);
     } else {
-      $SQL = $this->countNormal($SQL);
+        $SQL = $this->countNormal($SQL);
     }
 
     return $SQL;
@@ -87,6 +89,15 @@ class SelectCount implements SelectReadyInterface
     return $SQL;
 
   }
+
+    protected function countHaving ( $SQL )
+    {
+
+        $SQL = "SELECT COUNT(*) total FROM ({$SQL}) test";
+
+        return $SQL;
+
+    }
 
   public function getWhereValues ()
   {
