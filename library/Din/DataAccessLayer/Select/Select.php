@@ -115,10 +115,12 @@ class Select implements SelectReadyInterface
 
   }
 
-  public function left_join ( $table, $origin_field, $foreign_field )
+  public function left_join ( $table, $origin_field, $foreign_field, $origin_table = null  )
   {
+    $origin_table = is_null($origin_table) ? $this->_table : "`{$origin_table}`";
+
     $join = new Join($table, JoinTypes::LEFT);
-    $join->on("{$this->_table}.`{$origin_field}`", $foreign_field);
+    $join->on("{$origin_table}.`{$origin_field}`", $foreign_field);
 
     return $this->addJoin($join);
 
