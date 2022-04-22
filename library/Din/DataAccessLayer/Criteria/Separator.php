@@ -31,7 +31,7 @@ class Separator
   {
     $r = false;
 
-    if ( in_array(strtoupper($this->_expression), array('OR', 'AND')) ) {
+    if ( in_array(trim(strtoupper($this->_expression)), array('OR', 'AND')) ) {
       $r = true;
     }
 
